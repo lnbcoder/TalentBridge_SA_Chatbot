@@ -1,18 +1,26 @@
+import os
 from pathlib import Path
 from dotenv import load_dotenv
 
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from langchain_chroma import Chroma
+from langchain_pinecone import PineconeVectorStore
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from langchain_core.documents import Document
 
 load_dotenv(override=True)
 
 MODEL   = "gpt-4.1-nano"
-DB_NAME = str(Path(__file__).parent.parent / "vector_db")
 
-embeddings  = OpenAIEmbeddings(model="text-embedding-3-large")
-vectorstore = Chroma(persist_directory=DB_NAME, embedding_function=embeddings)
+INDEX_NAME = os.getenv(
+    "PINECONE_INDEX_NAME",
+    "talentbridge"
+)
+
+embeddings = OpenAIEmbeddings(
+    model="text-embedding-3-large"
+)
+
+vectorstore = PineconeVectorStore(index_name=INDEX_NAME, embedding=embeddings,)
 retriever   = vectorstore.as_retriever(search_kwargs={"k": 10})
 llm         = ChatOpenAI(temperature=0, model_name=MODEL)
 

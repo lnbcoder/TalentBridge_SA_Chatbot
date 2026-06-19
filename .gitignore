@@ -1,2 +1,5 @@
 .env
 .venv
+knowledge-base/**/*
+__pycache__/
+vector_db/
